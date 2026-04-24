@@ -1,20 +1,33 @@
 version: 2.1
 
-orbs:
-  node: circleci/node@5.1.0
-
 jobs:
-  build-and-test-with-orb:
+  build-and-test-manual:
     docker:
       - image: cimg/node:18.17.0
     steps:
       - checkout
       
-      # 핵심 포인트: 위 3단계(복원->설치->저장)가 이 코드로 완벽히 대체됩니다.
-      - node/install-packages:
-          pkg-manager: npm
+      # 1. 의존성 캐시 복원 (수동)
+      - restore_cache:
+          name: Restore npm dependencies
+          keys:
+            - node-deps-v1-{{ .Branch }}-{{ checksum "package-lock.json" }}
+            - node-deps-v1-{{ .Branch }}-
+            - node-deps-v1-
+            
+      # 2. 패키지 설치
+      - run:
+          name: Install Dependencies
+          command: npm install
           
-      # 테스트 실행
+      # 3. 변경된 의존성 캐시 저장 (수동)
+      - save_cache:
+          name: Save npm dependencies
+          key: node-deps-v1-{{ .Branch }}-{{ checksum "package-lock.json" }}
+          paths:
+            - ~/.npm
+            
+      # 4. 테스트 실행
       - run:
           name: Run Tests
           command: npm run test
@@ -22,4 +35,4 @@ jobs:
 workflows:
   build-and-test:
     jobs:
-      - build-and-test-with-orb
+      - build-and-test-manual
