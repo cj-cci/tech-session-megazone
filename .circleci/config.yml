@@ -1,23 +1,23 @@
 version: 2.1
 
 jobs:
-  build-no-dlc:
+  build-with-dlc:
     docker:
       - image: cimg/base:current
     steps:
       - checkout
-      # 핵심 비교 포인트: DLC 옵션이 없습니다.
-      # 이 경우, 이전 빌드에서 생성된 레이어를 재사용하지 못하고 매번 새로 빌드합니다.
-      - setup_remote_docker
+      # 핵심 비교 포인트: DLC 활성화!
+      - setup_remote_docker:
+          docker_layer_caching: true 
           
       - run:
-          name: Build Docker Image (Slow)
+          name: Build Docker Image (Fast)
           command: |
-            # 이 명령어가 실행될 때, 모든 레이어(FROM, RUN npm install 등)가 
-            # 새로 계산되거나 다운로드되어 많은 시간이 소요됩니다.
+            # 변경되지 않은 레이어는 즉시 캐시에서 불러오므로(Using cache),
+            # 빌드 시간이 드라마틱하게 줄어듭니다.
             docker build -t my-app:latest .
 
 workflows:
   demo:
     jobs:
-      - build-no-dlc
+      - build-with-dlc
