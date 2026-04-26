@@ -1,23 +1,32 @@
 version: 2.1
 
 jobs:
+  # 😱 Bad Case: 너무 작은 리소스 할당 (2GB RAM) -> 무조건 실패(OOM)합니다.
   build-heavy-app-bad:
     docker:
       - image: cimg/node:18.17.0
-    # 핵심 시연 포인트: 무거운 빌드에 너무 작은 리소스 할당
-    # 1 vCPU, 2GB RAM (React/Next.js 빌드 시 메모리 부족으로 뻗을 확률 높음)
     resource_class: small 
     steps:
       - checkout
       - run:
-          name: Install Dependencies
-          command: npm install
+          name: Run Heavy Build (Will Fail with OOM)
+          # 3GB를 할당하려고 시도하다가 컨테이너가 2GB 한계에 부딪혀 강제 종료(Killed)됩니다.
+          command: npm run build
+
+  # 🤩 Good Case: 넉넉한 리소스 할당 (8GB RAM) -> 안정적으로 성공합니다.
+  build-heavy-app-good:
+    docker:
+      - image: cimg/node:18.17.0
+    resource_class: large 
+    steps:
+      - checkout
       - run:
-          name: Build Application (Will likely fail)
-          # 메모리 사용량이 2GB를 초과하면서 프로세스가 강제 종료됩니다.
+          name: Run Heavy Build (Fast & Stable)
+          # 8GB RAM을 보유하고 있으므로 3GB 빌드도 거뜬히 통과합니다.
           command: npm run build
 
 workflows:
-  demo:
+  resource-class-demo:
     jobs:
       - build-heavy-app-bad
+      - build-heavy-app-good
