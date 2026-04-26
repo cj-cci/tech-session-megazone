@@ -1,23 +1,23 @@
 version: 2.1
 
 jobs:
-  build-heavy-app-good:
+  build-heavy-app-bad:
     docker:
       - image: cimg/node:18.17.0
-    # 핵심 시연 포인트: 작업 무게에 맞는 충분한 리소스 할당
-    # 4 vCPU, 8GB RAM (넉넉한 메모리와 다중 코어로 빌드 속도 극대화)
-    resource_class: large 
+    # 핵심 시연 포인트: 무거운 빌드에 너무 작은 리소스 할당
+    # 1 vCPU, 2GB RAM (React/Next.js 빌드 시 메모리 부족으로 뻗을 확률 높음)
+    resource_class: small 
     steps:
       - checkout
       - run:
           name: Install Dependencies
           command: npm install
       - run:
-          name: Build Application (Fast & Stable)
-          # 넉넉한 메모리 덕분에 실패 없이, 그리고 다중 코어로 훨씬 빠르게 완료됩니다.
+          name: Build Application (Will likely fail)
+          # 메모리 사용량이 2GB를 초과하면서 프로세스가 강제 종료됩니다.
           command: npm run build
 
 workflows:
-  dem:
+  demo:
     jobs:
-      - build-heavy-app-good
+      - build-heavy-app-bad
