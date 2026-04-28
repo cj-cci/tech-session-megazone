@@ -1,53 +1,29 @@
 version: 2.1
 
-# 1. Orbs: 타사 도구나 반복되는 설정을 한 줄로 가져와 사용합니다.
 orbs:
   node: circleci/node@5.1.0
 
 jobs:
-  test-and-split:
-    # 2. Resource Class: 작업의 무거운 정도에 따라 CPU/RAM 사이즈를 유연하게 선택합니다.
+  smarter-testing-demo:
     docker:
       - image: cimg/node:18.17.0
-    resource_class: large
-    
-    # 3. Parallelism: 테스트를 여러 컨테이너에 분산시켜 실행 시간을 획기적으로 단축합니다.
-    parallelism: 3
-    
+    # 핵심 시연 포인트 1: 3대의 노드에서 테스트를 병렬로 실행합니다.
+    parallelism: 3 
     steps:
       - checkout
       - node/install-packages:
           pkg-manager: npm
           
       - run:
-          name: Run tests with Test Splitting (Smarter Testing)
-          # 4. Smarter Testing (Test Splitting): 이전 테스트 소요 시간(timings)을 기반으로 
-          # 각 노드에 테스트를 가장 균등하고 스마트하게 분배합니다.
+          name: Run Tests with Dynamic Splitting
+          # 핵심 시연 포인트 2: 'circleci tests run'을 사용한 동적 테스트 분할
+          # glob으로 찾은 파일들을 이전 타이밍 데이터에 맞춰 동적으로 분할하고,
+          # xargs를 통해 npm run test:ci 명령어에 인자로 넘겨 즉시 실행합니다.
           command: |
-            TEST_FILES=$(circleci tests glob "tests/**/*.test.js" | circleci tests split --split-by=timings)
-            npm run test:ci -- $TEST_FILES
-            
-      # Smarter Testing (Test Insights): 테스트 결과를 저장하여 대시보드에서 Flaky Test 등을 분석하게 해줍니다.
+            circleci tests glob "tests/**/*.test.js" | \
+            circleci tests run --command="xargs npm run test:ci --" --verbose --split-by=timings
+
+      # 핵심 시연 포인트 3: Smarter Testing 엔진 활성화
+      # 테스트 결과가 담긴 XML 파일을 저장하여 Test Insights와 Flaky Test 탐지 데이터를 제공합니다.
       - store_test_results:
-          path: junit.xml
-
-  build-docker-image:
-    docker:
-      - image: cimg/base:current
-    resource_class: medium
-    steps:
-      - checkout
-      - setup_remote_docker:
-          # 5. Docker Layer Caching (DLC): 이전 빌드의 도커 레이어를 캐싱하여 빌드 속도를 대폭 높입니다.
-          docker_layer_caching: true
-      - run:
-          name: Build Docker Image
-          command: docker build -t my-company/demo-app:latest .
-
-workflows:
-  demo-workflow:
-    jobs:
-      - test-and-split
-      - build-docker-image:
-          requires:
-            - test-and-split # 테스트가 성공해야만 도커 빌드를 진행합니다.
+          path: test-results

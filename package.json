@@ -1,21 +1,15 @@
 {
-    "name": "circleci-demo",
-    "version": "1.0.0",
-    "scripts": {
-      "test": "jest",
-      "test:ci": "jest --ci --runInBand"
-    },
-    "dependencies": {
-      "express": "^4.18.2"
-    },
-    "devDependencies": {
-      "jest": "^29.7.0",
-      "jest-junit": "^16.0.0"
-    },
-    "jest": {
-      "reporters": [
-        "default",
-        "jest-junit"
-      ]
-    }
+  "name": "circleci-smarter-testing-demo",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "jest",
+    "test:ci": "JEST_JUNIT_OUTPUT_DIR='./test-results/' jest --ci --runInBand --reporters=default --reporters=jest-junit"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "jest-junit": "^16.0.0"
   }
+}
