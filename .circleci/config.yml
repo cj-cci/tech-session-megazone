@@ -1,16 +1,16 @@
 version: 2.1
 
 jobs:
-  # 😱 Bad Case: 너무 작은 리소스 할당 (2GB RAM) -> 무조건 실패(OOM)합니다.
+  # ✅ Fixed Case: 충분한 리소스 할당 (8GB RAM) -> 안정적으로 성공합니다.
   build-heavy-app-bad:
     docker:
       - image: cimg/node:18.17.0
-    resource_class: small 
+    resource_class: large
     steps:
       - checkout
       - run:
           name: Run Heavy Build (Will Fail with OOM)
-          # 3GB를 할당하려고 시도하다가 컨테이너가 2GB 한계에 부딪혀 강제 종료(Killed)됩니다.
+          # large 리소스 클래스(8GB RAM)를 사용하여 5GB 빌드도 안정적으로 완료합니다.
           command: npm run build
 
   # 🤩 Good Case: 넉넉한 리소스 할당 (8GB RAM) -> 안정적으로 성공합니다.
