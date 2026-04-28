@@ -21,7 +21,7 @@ jobs:
           # xargs를 통해 npm run test:ci 명령어에 인자로 넘겨 즉시 실행합니다.
           command: |
             circleci tests glob "tests/**/*.test.js" | \
-            circleci tests run --command="xargs npm run test:ci --" --verbose --split-by=timings
+            circleci tests run --command="xargs npm run test:ci -- --" --verbose --split-by=timings
 
       # 핵심 시연 포인트 3: Smarter Testing 엔진 활성화
       # 테스트 결과가 담긴 XML 파일을 저장하여 Test Insights와 Flaky Test 탐지 데이터를 제공합니다.
