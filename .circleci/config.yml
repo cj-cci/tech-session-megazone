@@ -11,9 +11,6 @@ jobs:
       - image: cimg/node:18.17.0
     resource_class: large
     
-    # 3. Parallelism: 테스트를 여러 컨테이너에 분산시켜 실행 시간을 획기적으로 단축합니다.
-    parallelism: 3
-    
     steps:
       - checkout
       - node/install-packages:
