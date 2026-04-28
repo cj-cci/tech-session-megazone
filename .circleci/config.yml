@@ -27,3 +27,8 @@ jobs:
       # 테스트 결과가 담긴 XML 파일을 저장하여 Test Insights와 Flaky Test 탐지 데이터를 제공합니다.
       - store_test_results:
           path: test-results
+
+workflows:
+  smarter-testing-demo:
+    jobs:
+      - smarter-testing-demo
